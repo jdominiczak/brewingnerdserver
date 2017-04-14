@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'users', views.UserViewSet)
-router.register(r'recipes', views.RecipeViewSet)
+router.register(r'recipes', views.RecipeViewSet, 'recipe')
 router.register(r'miscs', views.MiscViewSet)
 router.register(r'misc_usages', views.Misc_usageViewSet)
 router.register(r'hops', views.HopViewSet)
@@ -32,7 +32,10 @@ router.register(r'devices', views.DeviceViewSet)
 router.register(r'sensors', views.SensorViewSet)
 router.register(r'sensor_assignments', views.SensorAssignmentViewSet)
 router.register(r'alerts', views.AlertViewSet)
-router.register(r'upload_recipe', views.UploadRecipeViewSet, base_name='upload_recipe')
+router.register(r'recipe_assignments', views.RecipeAssignmentViewSet, 'recipeassignment')
+router.register(r'data', views.DataViewSet, 'data')
+#router.register(r'upload_recipe', views.UploadRecipeViewSet, base_name='upload_recipe')
+#router.register(r'upload_data', views.UploadDataViewSet, base_name='upload_data')
 
 # The API URLs are now determined automatically by the router.
 # Additionally, we include the login URLs for the browsable API.

@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from brewery import util
 import re
 from decimal import *
+from rest_framework.reverse import reverse
+from brewery import views
 
 
 try:
@@ -420,8 +422,9 @@ def mashprofile_data_from_element(element, recipe):
         
     mash_usage = models.Mash_profile_usage(**mashUsageDict)
     mash_usage.mash_profile=mash_profile
-    mash_usage.recipe=recipe
     mash_usage.save()
+    recipe.mash_profile_usage = mash_usage
+    recipe.save()
     
     for step in stepArray:
         if found_profile == None:    
@@ -436,8 +439,6 @@ def mashprofile_data_from_element(element, recipe):
         step_usage.mash_step = mash_step
         step_usage.mash_profile_usage = mash_usage
         step_usage.save()
-    #print(stepArray)
-    #return mashDict
 
 
 
@@ -462,7 +463,7 @@ def mashstep_data_from_element(element, order):
     return [stepDict, usageDict]
 
 
-def ProcessRecipe(rec):
+def ProcessRecipe(rec, request):
     if rec.tag == "RECIPE":
         recipe = recipe_data_from_element(rec)
     
@@ -514,12 +515,12 @@ def ProcessRecipe(rec):
       
     ## Recipe is finalized, update it (which also saves it)
     util.updateRecipe(recipe)
-    #recipe.save()  
     
     ### Return the link to this recipe    
-    return True, {"url" : "http://127.0.0.1:8000/recipes/" + str(recipe.id) + "/"}
+    return True, {"url" : reverse("recipe-detail", args=[recipe.id], request=request)}
 
-def DeserializeRecipeXML(file):
+
+def DeserializeRecipeXML(file, request):
     xml_file = file.read().decode("utf-8")
     #print(xml_file)
     #for line in file:
@@ -528,7 +529,7 @@ def DeserializeRecipeXML(file):
     tree = ET.fromstring(xml_file)
     created = True
     for recipe in tree:
-        created, val = ProcessRecipe(recipe)
+        created, val = ProcessRecipe(recipe, request)
         if created:
             urls.append(val)
         else: 

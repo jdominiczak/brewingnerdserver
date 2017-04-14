@@ -35,7 +35,7 @@ def updateRecipe(recipe):
         
     postboilColdVol = Decimal(recipe.batch_size) + chillerLoss
     postboilHotVol = (postboilColdVol/(1-SHRINKAGE_PERCENT)) #postboilColdVol + shrinkage
-    evap_amount = (postboilHotVol / (1- (evap_rate)/100 )) - postboilHotVol
+    evap_amount = (Decimal(postboilHotVol) / (1- (Decimal(evap_rate))/100 )) - Decimal(postboilHotVol)
     preboilVol = postboilHotVol + evap_amount
     
     grain_weight = getGrainWeight(recipe)
@@ -88,7 +88,7 @@ def updateRecipe(recipe):
     
     ## Calculate est FG for yeast
     attenuation = DEFAULT_YEAST_ATTENUATION
-    if recipe.yeasts.first() is not None:
+    if recipe.yeast_usages.first() is not None:
         attenuation = getMaxYeastAttenuation(recipe)
     recipe.est_fg = ((recipe.est_og - Decimal(1)) * Decimal(1000)) * (Decimal(1) - (attenuation)/Decimal(100)) / Decimal(1000) + Decimal(1)
     recipe.est_attenuation = attenuation
@@ -101,6 +101,9 @@ def updateRecipe(recipe):
     
     # Calculate Calories Estimated
     recipe.est_calories = getCalories(recipe.est_og, recipe.est_fg)
+    
+    # Calculate Mash Profile Usages
+    updateMashProfile(recipe)
     
     ######################
     #
@@ -145,6 +148,36 @@ def updateRecipe(recipe):
         
     recipe.save()
     
+def updateMashProfile(recipe):
+    SPECIFIC_HEAT_GRAIN = Decimal(0.3822)
+    
+    
+    if recipe.mash_profile_usage is not None:
+        infuse_amount = 0
+        for step_usage in recipe.mash_profile_usage.mash_steps.all():
+            if step_usage.mash_step.type == "Infusion":
+                step_usage.infuse_amount = step_usage.mash_step.water_grain_ratio * Decimal(2.08635) * getGrainWeight(recipe) 
+                print(step_usage.infuse_amount)
+                infuse_amount += step_usage.infuse_amount
+                step_usage.save()
+        print(infuse_amount)
+        if infuse_amount == 0:
+            recipe.mash_profile_usage.sparge_volume = None
+        else:
+            recipe.mash_profile_usage.sparge_volume = recipe.est_total_water_vol - infuse_amount
+        recipe.mash_profile_usage.save()
+        
+        ## Mash Temperatures for infusions
+        
+        for step_usage in recipe.mash_profile_usage.mash_steps.all():
+            if step_usage.mash_step.type == "Infusion":
+                # calculate infusion temperature
+                if step_usage.mash_step.mash_order == 0:
+                    step_usage.infuse_temp = getGrainWeight(recipe) * Decimal(1000) * SPECIFIC_HEAT_GRAIN * (Decimal(step_usage.mash_step.step_temp) - Decimal(recipe.mash_profile_usage.grain_temp)) / (Decimal(step_usage.infuse_amount) * Decimal(1000)) + Decimal(step_usage.mash_step.step_temp)
+                    step_usage.save()    
+                    
+            
+    
 def getCalories(og, fg):
     if og is not None and fg is not None:
         og = Decimal(og)
@@ -159,14 +192,14 @@ def getABV(og, fg):
     if og is not None and fg is not None:
         og = Decimal(og)
         fg = Decimal(fg)
-        return (og - fg ) * Decimal(131.25)
+        return ((og - fg ) * Decimal(131.25)) * Decimal(100)
     else:
         return Decimal(0)
 
 def getIBU(recipe):
     ibu_total = Decimal(0)
     bigness_factor = Decimal(1.65)*(Decimal(.000125)**(recipe.est_og-Decimal(1)))
-    for hop in recipe.hops.all():
+    for hop in recipe.hop_usages.all():
         boiltime_factor = (Decimal(1) - Decimal(exp(Decimal(-0.04)*hop.time)))/Decimal(4.15)
         utilization_percent = bigness_factor * boiltime_factor
         hop_alpha_percent = hop.alpha/Decimal(100)
@@ -183,16 +216,16 @@ def getIBU(recipe):
 def getGrainWeight(recipe):
     grainWeight = 0
     
-    for fermentable in recipe.fermentables.all():
-        if fermentable.fermentable.type == "Grain" and fermentable.add_after_boil == False:
-            grainWeight += fermentable.amount
+    for fermentable_usage in recipe.fermentable_usages.all():
+        if fermentable_usage.fermentable.type == "Grain" and fermentable_usage.add_after_boil == False:
+            grainWeight += fermentable_usage.amount
     return grainWeight
     
 def getGravityPointsPotential(recipe):
     points = 0
-    for fermentable in recipe.fermentables.all():
-        if fermentable.add_after_boil == False:
-            points += fermentable.amount * (fermentable.fermentable.raw_yield/Decimal(100)) * DEFAULT_P_KG_L
+    for fermentable_usage in recipe.fermentable_usages.all():
+        if fermentable_usage.add_after_boil == False:
+            points += fermentable_usage.amount * (fermentable_usage.fermentable.raw_yield/Decimal(100)) * DEFAULT_P_KG_L
             #print(fermentable.fermentable.name + "Added Points:" + str(fermentable.amount * (fermentable.fermentable.raw_yield/Decimal(100)) * DEFAULT_P_KG_L ) + " Total Points:" + str(points))
     #return (points/Decimal(100))
     return points
@@ -201,15 +234,15 @@ def getSRMColor(recipe):
     #MCU = (grain_color * grain_weight_lbs)/volume_gal
     #SRM = 1.4922 * (mcu ^ 0.6859)
     total_mcu = 0
-    for fermentable in recipe.fermentables.all():
-        mcu = (fermentable.fermentable.color * kgToPounds(fermentable.amount))/litersToGallons(recipe.batch_size)
+    for fermentable_usage in recipe.fermentable_usages.all():
+        mcu = (fermentable_usage.fermentable.color * kgToPounds(fermentable_usage.amount))/litersToGallons(recipe.batch_size)
         total_mcu += mcu
     srm = Decimal(1.4922) * total_mcu**Decimal(0.6859)
     return srm
     
 def getMaxYeastAttenuation(recipe):
     max_attenuation = 0
-    for yeast_usage in recipe.yeasts.all():
+    for yeast_usage in recipe.yeast_usages.all():
         if yeast_usage.yeast.attenuation > max_attenuation:
             max_attenuation = yeast_usage.yeast.attenuation
     return max_attenuation
@@ -231,3 +264,6 @@ def gramsToOz(grams):
     
 def ozToGrams(oz):
     return Decimal(oz) * Decimal(28.3495)
+    
+def toBool(string):
+    return string.lower() in ("yes", "true", "t", "1")
