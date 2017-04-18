@@ -246,6 +246,14 @@ def getMaxYeastAttenuation(recipe):
         if yeast_usage.yeast.attenuation > max_attenuation:
             max_attenuation = yeast_usage.yeast.attenuation
     return max_attenuation
+    
+def getLastDatapoint(sensor):
+    try:
+        return models.Data.objects.order_by("-timestamp").filter(sensor=sensor)[0:1].get()  
+    except models.Data.DoesNotExist:
+        return None  
+    
+    
 
 def gallonsToLiters(gallons):
     return Decimal(gallons) * Decimal(3.785411784)

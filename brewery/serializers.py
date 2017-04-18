@@ -296,7 +296,7 @@ class SensorAssignmentSerializer(serializers.HyperlinkedModelSerializer):
 
         
 class AlertSerializer(serializers.HyperlinkedModelSerializer):
-    priority = serializers.ChoiceField(choices=['Low', 'Medium', 'High', 'Disaster'])
+    #priority = serializers.ChoiceField(choices=['Low', 'Medium', 'High', 'Disaster'])
     target = GenericRelatedField({
             models.Tap: serializers.HyperlinkedRelatedField(
                 queryset = models.Tap.objects.all(),
@@ -325,7 +325,7 @@ class AlertSerializer(serializers.HyperlinkedModelSerializer):
         })
     class Meta:
         model = models.Alert
-        fields = ('created_at', 'modified_at','title', 'description', 'acknowledged', 'target', 'priority' )
+        fields = ('url', 'created_at', 'modified_at','title', 'description', 'acknowledged', 'target', 'type', 'resolved_timestamp', 'notification_timestamp')
         #fields = '__all__'
  
 

@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, post_delete, pre_delete
 from django.dispatch import receiver
 from brewery import util
 from decimal import Decimal
+from brewery.tasks import send_alert_notification
 
 # Create your models here.
     
@@ -345,6 +346,7 @@ class Device(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     serial = models.CharField(max_length=100)  
+    name = models.CharField(max_length=100, null=True)
     
 class Sensor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -353,6 +355,9 @@ class Sensor(models.Model):
     serial = models.CharField(max_length=100) 
     device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True, related_name='sensors')   
     unit = models.CharField(max_length=100) 
+    name = models.CharField(max_length=100, null=True)
+    enabled = models.BooleanField(default=True)
+    checkin_interval = models.IntegerField(default=5)
     
 class RecipeAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -385,7 +390,10 @@ class Alert(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     target = GenericForeignKey('content_type', 'object_id')    
-    priority = models.CharField(max_length=20, default="Low")
+    #priority = models.CharField(max_length=20, default="Low")
+    resolved_timestamp = models.DateTimeField(default=None, null=True)
+    type = models.CharField(max_length=100, default="Other")
+    notification_timestamp = models.DateTimeField(default=None, null=True)
     
 class Data(models.Model):
     created_at = models.DateTimeField()
@@ -465,4 +473,5 @@ def equipment_update_handler(sender, instance, **kwargs):
 def alert_create_handler(sender, instance, created, **kwargs):
     if created:
         ### Fire off a notification celery task that a new alert has been created
+        send_alert_notification.delay(instance.title, instance.description, "") #instance.target.url)
         print("******* New Alert Created **********")

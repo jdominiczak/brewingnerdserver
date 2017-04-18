@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'brewery.apps.BreweryConfig',
     'generic_relations',
+    'django_celery_beat',
 ]
 
 
