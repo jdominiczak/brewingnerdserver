@@ -1,0 +1,9 @@
+django==1.11
+markdown==2.6.8
+djangorestframework==3.6.2
+django-filter==1.0.2
+celery==4.0.2
+rest-framework-generic-relations==1.1.0
+django-celery-beat==1.0.1
+requests==2.13.0
+gunicorn==19.7

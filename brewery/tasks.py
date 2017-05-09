@@ -7,13 +7,20 @@ from django.contrib.contenttypes.models import ContentType
 
 NOTIFICATION_RESEND_TIME = 28800 #8 hours  #43200 #12 hours
 
+#Set up the watchdog checks every 30 seconds
+#@app.on_after_configure.connect
+#def setup_periodic_tasks(sender, **kwargs):
+#    print("got to watchdog")
+#    sender.add_periodic_task(30.0, recurring_watchdog.s(), name='Watchdog Checks')
+
+
 @app.task
 def send_alert_notification(alertTitle, alertDescription, alertUrl):
     send_pushbullet_message(alertTitle, alertDescription, alertUrl)
     return True
     
-@app.task
-def recurring_watchdog():
+@app.task()
+def recurring_watchdog(*args):
     print("Watchdog Process Running")
     for sensor in models.Sensor.objects.all().filter(enabled=True):
         data = util.getLastDatapoint(sensor)
@@ -76,9 +83,17 @@ def create_inactivity_alert(sensor):
     
     
 def send_pushbullet_message(title, body, url):
+    print("Sending Pushbullet")
     pburl = "https://api.pushbullet.com/v2/pushes"
-    headers = {"Access-Token":"o.kjUIVVWp4RNzTlvdpAVMap2RKpZnkA5y","Content-Type":"application/json"}
+    headers = {"Access-Token":"o.sh6mVopew9pfZg9kC1nJHMkx80okC6WI","Content-Type":"application/json"}
     payload = {"type":"note", "title": title, "body":body, "url": url}
     r = requests.post(pburl, json=payload, headers=headers)
     
 
+app.conf.beat_schedule = {
+    'watchdog-task': {
+        'task':'brewery.tasks.recurring_watchdog',
+        'schedule': 60.0,
+        'args': None
+    },
+}
