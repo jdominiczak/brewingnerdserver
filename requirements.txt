@@ -7,3 +7,4 @@ rest-framework-generic-relations==1.1.0
 django-celery-beat==1.0.1
 requests==2.13.0
 gunicorn==19.7
+django-cors-headers==2.1.0

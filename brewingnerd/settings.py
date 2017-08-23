@@ -45,10 +45,12 @@ INSTALLED_APPS = [
     'brewery.apps.BreweryConfig',
     'generic_relations',
     'django_celery_beat',
+    'corsheaders',
 ]
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -122,7 +124,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-
+CORS_ORIGIN_ALLOW_ALL = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
@@ -136,12 +138,12 @@ REST_FRAMEWORK = {
 # Rabbit Config
 RABBIT_HOSTNAME = os.environ.get('RABBIT_PORT_5672_TCP', 'rabbit')
 
-if RABBIT_HOSTNAME.startswith('tcp://'):  
+if RABBIT_HOSTNAME.startswith('tcp://'):
     RABBIT_HOSTNAME = RABBIT_HOSTNAME.split('//')[1]
 
 BROKER_URL = os.environ.get('BROKER_URL', '')
 
-if not BROKER_URL:  
+if not BROKER_URL:
     BROKER_URL = 'amqp://{user}:{password}@{hostname}:{port}/{vhost}/'.format(
         user=os.environ.get('RABBITMQ_DEFAULT_USER', 'admin1'),
         password=os.environ.get('RABBITMQ_DEFAULT_PASS', 'mypass1'),
@@ -151,42 +153,42 @@ if not BROKER_URL:
 
 
 # We don't want to have dead connections stored on rabbitmq, so we have to negotiate using heartbeats
-BROKER_HEARTBEAT = 30 #'?heartbeat=30'  
-#if not BROKER_URL.endswith(BROKER_HEARTBEAT):  
+BROKER_HEARTBEAT = 30 #'?heartbeat=30'
+#if not BROKER_URL.endswith(BROKER_HEARTBEAT):
 #    BROKER_URL += BROKER_HEARTBEAT
 
-BROKER_POOL_LIMIT = 1  
+BROKER_POOL_LIMIT = 1
 BROKER_CONNECTION_TIMEOUT = 30 #10
 
 # Celery configuration
 
 # configure queues, currently we have only one
-CELERY_DEFAULT_QUEUE = 'default'  
-CELERY_QUEUES = (  
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
 )
 
 # Sensible settings for celery
-CELERY_ALWAYS_EAGER = False  
-CELERY_ACKS_LATE = True  
-CELERY_TASK_PUBLISH_RETRY = True  
+CELERY_ALWAYS_EAGER = False
+CELERY_ACKS_LATE = True
+CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
 
 # By default we will ignore result
 # If you want to see results and try out tasks interactively, change it to False
 # Or change this setting on tasks level
-CELERY_IGNORE_RESULT = True  
-CELERY_SEND_TASK_ERROR_EMAILS = False  
+CELERY_IGNORE_RESULT = True
+CELERY_SEND_TASK_ERROR_EMAILS = False
 CELERY_TASK_RESULT_EXPIRES = 600
 
 # Set redis as celery result backend
-#CELERY_RESULT_BACKEND = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)  
+#CELERY_RESULT_BACKEND = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
 #CELERY_REDIS_MAX_CONNECTIONS = 1
 
 # Don't use pickle as serializer, json is much safer
-CELERY_TASK_SERIALIZER = "json"  
+CELERY_TASK_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ['application/json']
 
-CELERYD_HIJACK_ROOT_LOGGER = False  
-CELERYD_PREFETCH_MULTIPLIER = 1  
-CELERYD_MAX_TASKS_PER_CHILD = 1000 
+CELERYD_HIJACK_ROOT_LOGGER = False
+CELERYD_PREFETCH_MULTIPLIER = 1
+CELERYD_MAX_TASKS_PER_CHILD = 1000

@@ -90,10 +90,11 @@ def send_pushbullet_message(title, body, url):
     r = requests.post(pburl, json=payload, headers=headers)
     
 
+# Configure the watchdog task to run every 120 seconds
 app.conf.beat_schedule = {
     'watchdog-task': {
         'task':'brewery.tasks.recurring_watchdog',
-        'schedule': 60.0,
+        'schedule': 120.0,
         'args': None
     },
 }
