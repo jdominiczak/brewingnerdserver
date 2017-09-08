@@ -8,7 +8,7 @@ from decimal import Decimal
 from brewery.tasks import send_alert_notification
 
 # Create your models here.
-    
+
 class Equipment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -46,10 +46,10 @@ class Style(models.Model):
     ibu_max = models.DecimalField(decimal_places=4, max_digits=10) #Required
     color_min = models.DecimalField(decimal_places=4, max_digits=10) #Required
     color_max = models.DecimalField(decimal_places=4, max_digits=10) #Required
-    carb_min = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    carb_max = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    abv_min = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    abv_max = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    carb_min = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    carb_max = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    abv_min = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    abv_max = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     notes = models.TextField(blank=True)
     profile = models.TextField(blank=True)
     ingredients = models.TextField(blank=True)
@@ -60,7 +60,7 @@ class Fermentation_profile(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100) #Required
     notes = models.TextField(blank=True)
-    
+
 class Fermentation_step(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -70,28 +70,28 @@ class Fermentation_step(models.Model):
     end_temp = models.DecimalField(decimal_places=2, max_digits=10) #Required
     length = models.IntegerField()
     fermentation_profile = models.ForeignKey(Fermentation_profile, related_name='fermentation_steps', on_delete=models.CASCADE) #Required
-    
+
     class Meta:
-        unique_together = ('fermentation_profile', 'order')  
-        
+        unique_together = ('fermentation_profile', 'order')
+
 class Mash_profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100) #Required
-    sparge_temp = models.DecimalField(decimal_places=2, max_digits=10, null=True) 
+    sparge_temp = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     ph = models.DecimalField(decimal_places=2, max_digits=10, null=True)
-    notes = models.TextField(blank=True) 
-    
-class Mash_profile_usage(models.Model):    
+    notes = models.TextField(blank=True)
+
+class Mash_profile_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    grain_temp = models.DecimalField(decimal_places=2, max_digits=10, null=True) 
+    grain_temp = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     tun_temp = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     equip_adjust = models.BooleanField(default=False) #Default False
     mash_profile = models.ForeignKey(Mash_profile, on_delete=models.CASCADE)#Required
     sparge_volume = models.DecimalField(decimal_places=6, max_digits=10, null=True)
     #recipe = models.ForeignKey(Recipe, related_name='mash_profile', on_delete=models.CASCADE)#Required
-    
+
 class Mash_step(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -104,11 +104,11 @@ class Mash_step(models.Model):
     water_grain_ratio = models.DecimalField(decimal_places=2, max_digits=10)
     mash_order = models.IntegerField() #required
     mash_profile = models.ForeignKey(Mash_profile, related_name='mash_steps', on_delete=models.CASCADE) #Required
-    
+
     class Meta:
         order_with_respect_to = 'mash_order'
         unique_together = ('mash_order', 'mash_profile')
-    
+
 class Mash_step_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -120,17 +120,17 @@ class Mash_step_usage(models.Model):
 class Recipe(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=100, blank=True) 
+    name = models.CharField(max_length=100, blank=True)
     type = models.CharField(max_length=100) # Required
     brewer = models.CharField(max_length=100, blank=True)
     asst_brewer = models.CharField(max_length=100, blank=True)
     batch_size = models.DecimalField(decimal_places=4, max_digits=10) # Required
     boil_time = models.DecimalField(decimal_places=4, max_digits=10) # Required
-    
+
     notes = models.TextField(blank=True)
     taste_notes = models.TextField(blank=True)
     taste_rating = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    
+
     age = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     age_temp = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     date = models.DateTimeField(null=True)
@@ -140,12 +140,12 @@ class Recipe(models.Model):
     carbonation_temp = models.DecimalField(decimal_places=4, max_digits=10, null=True, blank=True)
     priming_sugar_equiv = models.DecimalField(decimal_places=4, max_digits=10, null=True, blank=True)
     keg_priming_factor = models.DecimalField(decimal_places=4, max_digits=10, null=True, blank=True)
-    
+
     ### These were in Equipment_usage that used to exist
     top_up_kettle = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     top_up_water = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    
-    
+
+
     est_total_water_vol = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_og = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_fg = models.DecimalField(decimal_places=4, max_digits=10, null=True)
@@ -156,14 +156,14 @@ class Recipe(models.Model):
     est_pre_boil_og = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_pre_boil_vol = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_calories = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    est_boil_size = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    est_boil_size = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_efficiency = models.DecimalField(decimal_places=4, max_digits=10, default=Decimal(72))
     est_mash_efficiency = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     est_by_mash_efficiency = models.BooleanField(default=False)
     est_attenuation = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    
-    
-    
+
+
+
     measured_abv = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     measured_calories = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     measured_og = models.DecimalField(decimal_places=4, max_digits=10, null=True)
@@ -174,7 +174,7 @@ class Recipe(models.Model):
     measured_efficiency = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     measured_mash_efficiency = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     measured_attenuation = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    
+
     ## Foreign Keys
     equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL, null=True)
     style = models.ForeignKey(Style, on_delete=models.SET_NULL, null=True)
@@ -187,8 +187,8 @@ class Misc(models.Model):
     name = models.CharField(max_length=100) # Required
     type = models.CharField(max_length=100) # Required
     use_for = models.TextField(blank=True)
-    notes = models.TextField(blank=True)    
-    
+    notes = models.TextField(blank=True)
+
 class Misc_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -205,8 +205,8 @@ class Hop(models.Model):
     name = models.CharField(max_length=100)  # Required
     default_alpha = models.DecimalField(decimal_places=4, max_digits=10) # Required
     notes = models.TextField(blank=True)
-    type = models.CharField(max_length=100, blank=True) 
-    
+    type = models.CharField(max_length=100, blank=True)
+
     default_beta = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     hsi = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     origin = models.TextField(blank=True)
@@ -220,20 +220,21 @@ class Hop_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     alpha = models.DecimalField(decimal_places=4, max_digits=10, null=True)
-    amount = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    amount = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     use = models.CharField(max_length=100) # Required
     time = models.DecimalField(decimal_places=4, max_digits=10) # Required
     form = models.CharField(max_length=100) # Required
-    beta = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    humulene = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    caryophyllene = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    cohumulone = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    myrcene = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    beta = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    humulene = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    caryophyllene = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    cohumulone = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    myrcene = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    ibu_component = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     hop = models.ForeignKey(Hop, on_delete=models.PROTECT) # Required
     recipe = models.ForeignKey(Recipe, related_name='hop_usages', on_delete=models.CASCADE) # Required
 
 
-    
+
 class Yeast(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -242,14 +243,14 @@ class Yeast(models.Model):
     form = models.CharField(max_length=100) # Required
     laboratory = models.CharField(max_length=100, blank=True)
     product_id = models.CharField(max_length=100, blank=True)
-    min_temperature = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
-    max_temperature = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    min_temperature = models.DecimalField(decimal_places=4, max_digits=10, null=True)
+    max_temperature = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     flocculation = models.CharField(max_length=100, blank=True)
-    attenuation = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    attenuation = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     notes = models.TextField(blank=True)
     best_for = models.TextField(blank=True)
     max_reuse = models.IntegerField(null=True)
-    
+
 class Yeast_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -259,7 +260,7 @@ class Yeast_usage(models.Model):
     add_to_secondary = models.BooleanField(default=False)
     yeast = models.ForeignKey(Yeast, on_delete=models.PROTECT) # Required
     recipe = models.ForeignKey(Recipe, related_name='yeast_usages', on_delete=models.CASCADE) # Required
-    
+
 class Fermentable(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -286,7 +287,7 @@ class Fermentable_usage(models.Model):
     add_after_boil = models.BooleanField(default=False)#Required
     fermentable = models.ForeignKey(Fermentable, on_delete=models.PROTECT) #Required
     recipe = models.ForeignKey(Recipe, related_name='fermentable_usages', on_delete=models.CASCADE) #Required
-        
+
 class Water(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -297,24 +298,24 @@ class Water(models.Model):
     chloride = models.DecimalField(decimal_places=4, max_digits=10) #Required
     sodium = models.DecimalField(decimal_places=4, max_digits=10) #Required
     magnesium = models.DecimalField(decimal_places=4, max_digits=10) #Required
-    ph = models.DecimalField(decimal_places=4, max_digits=10, null=True) 
+    ph = models.DecimalField(decimal_places=4, max_digits=10, null=True)
     notes = models.TextField(blank=True)
-        
-class Water_usage(models.Model):    
+
+class Water_usage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     amount = models.DecimalField(decimal_places=4, max_digits=10)
     water = models.ForeignKey(Water, on_delete=models.PROTECT) #REQUIRED
     recipe = models.ForeignKey(Recipe, related_name='water_usages', on_delete=models.CASCADE) #Required
-    
 
-  
+
+
 class Fermenter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100)
     chamber = models.ForeignKey('Chamber', related_name='fermenter', on_delete=models.CASCADE) #required
-    
+
 class Chamber(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -323,14 +324,14 @@ class Chamber(models.Model):
     manual_heat_diff = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     manual_cool_diff = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     operation_type = models.CharField(max_length=100, default="Off")
-    active_fermenter = models.ForeignKey(Fermenter, on_delete=models.SET_NULL, null=True, related_name='active_fermenter')    
-    
+    active_fermenter = models.ForeignKey(Fermenter, on_delete=models.SET_NULL, null=True, related_name='active_fermenter')
+
 class Tap(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100)
     kegerator = models.ForeignKey('Kegerator', related_name='Taps', on_delete=models.CASCADE) #required
-    
+
 class Kegerator(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -339,26 +340,26 @@ class Kegerator(models.Model):
     manual_heat_diff = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     manual_cool_diff = models.DecimalField(decimal_places=2, max_digits=10, null=True)
     operation_type = models.CharField(max_length=100, default="Off")
-    active_tap = models.ForeignKey(Tap, on_delete=models.SET_NULL, null=True, related_name='active_tap')  
-    
-    
+    active_tap = models.ForeignKey(Tap, on_delete=models.SET_NULL, null=True, related_name='active_tap')
+
+
 class Device(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    serial = models.CharField(max_length=100)  
+    serial = models.CharField(max_length=100)
     name = models.CharField(max_length=100, null=True)
-    
+
 class Sensor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    type = models.CharField(max_length=100) 
-    serial = models.CharField(max_length=100) 
-    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True, related_name='sensors')   
-    unit = models.CharField(max_length=100) 
+    type = models.CharField(max_length=100)
+    serial = models.CharField(max_length=100)
+    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True, related_name='sensors')
+    unit = models.CharField(max_length=100)
     name = models.CharField(max_length=100, null=True)
     enabled = models.BooleanField(default=True)
     checkin_interval = models.IntegerField(default=5)
-    
+
 class RecipeAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -368,8 +369,8 @@ class RecipeAssignment(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     assignment = GenericForeignKey('content_type', 'object_id')
-    
-    
+
+
 class SensorAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -379,22 +380,22 @@ class SensorAssignment(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     assignment = GenericForeignKey('content_type', 'object_id')
-    
-    
+
+
 class Alert(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    title = models.CharField(max_length=200) 
+    title = models.CharField(max_length=200)
     description = models.TextField()
     acknowledged = models.BooleanField(default=False)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    target = GenericForeignKey('content_type', 'object_id')    
+    target = GenericForeignKey('content_type', 'object_id')
     #priority = models.CharField(max_length=20, default="Low")
     resolved_timestamp = models.DateTimeField(default=None, null=True)
     type = models.CharField(max_length=100, default="Other")
     notification_timestamp = models.DateTimeField(default=None, null=True)
-    
+
 class Data(models.Model):
     created_at = models.DateTimeField()
     data = models.CharField(max_length=200)
@@ -402,10 +403,10 @@ class Data(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     timestamp = models.DateTimeField(null=True)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name="data")
-    
-    
-    
-    
+
+
+
+
 ################################
 #
 # Signals to tell the updateRecipe function to run or to ignore
@@ -419,27 +420,38 @@ class Data(models.Model):
 @receiver(post_save, sender=Yeast_usage)
 @receiver(post_delete, sender=Yeast_usage)
 def usage_update_handler(sender, instance, **kwargs):
-    # Update the parent Recipe
-    util.updateRecipe(instance.recipe)
+    if hasattr(instance, '_ignore_hop_update'):
+        print("Instance Variable found, skipping")
+        return
+    else:
+        print("No instance variable found")
+        #instance._ig = True
+        print("Setting instance Variable")
+        # Update the parent Recipe
+        util.updateRecipe(instance.recipe)
+        #del instance._ignore_update
+
+
 
 @receiver(pre_delete, sender=Recipe)
 def recipe_delete_handler(sender, instance, **kwargs):
     instance._meta._ignore_update = True
-    
+
 @receiver(post_delete, sender=Recipe)
 def recipe_delete_post_handler(sender, instance, **kwargs):
     instance._meta._ignore_update = False
     del instance._meta._ignore_update
-     
+
 @receiver(post_save, sender=Recipe)
 def recipe_update_handler(sender, instance, **kwargs):
-    # Extra code here is to not recursively update the recipe since the update recipe saves on 
+    # Extra code here is to not recursively update the recipe since the update recipe saves on
     if hasattr(instance, '_save_in_progress'):
-        del instance._save_in_progress
+        #del instance._save_in_progress
         return
     instance._save_in_progress = True
     util.updateRecipe(instance)
-    
+    del instance._save_in_progress
+
 ## Update all recipes that use this Yeast
 @receiver(post_save, sender=Yeast)
 @receiver(post_delete, sender=Yeast)

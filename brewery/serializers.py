@@ -357,7 +357,7 @@ class RecipeListSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = models.Recipe
-        fields = ('url', 'type', 'created_at', 'modified_at', 'name', 'batch_size', 'date', 'est_og','est_fg','measured_og', 'measured_fg', 'est_ibu', 'est_ibu_method', 'est_color', 'assignments')
+        fields = ('id', 'url', 'type', 'created_at', 'modified_at', 'name', 'batch_size', 'date', 'est_og','est_fg','measured_og', 'measured_fg', 'est_ibu', 'est_ibu_method', 'est_color', 'assignments')
 
 class DataSerializer(serializers.HyperlinkedModelSerializer):
     unit = serializers.ChoiceField(choices=['Celsius', 'Fahrenheit', 'PSI', 'kPa', 'Lpm', 'Gpm', 'SG', 'Brix'])
